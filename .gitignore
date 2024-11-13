@@ -1,0 +1,4 @@
+aws/
+task_altair.pem
+terraform.tfstate
+terraform.tfstate.backup
