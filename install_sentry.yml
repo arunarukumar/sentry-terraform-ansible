@@ -1,0 +1,49 @@
+---
+- name: Install Sentry
+  hosts: all
+  become: true
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install required dependencies
+      apt:
+        name:
+          - python3-pip
+          - python3-dev
+          - libpq-dev
+          - libjpeg-dev
+          - libxml2-dev
+          - libxslt1-dev
+          - zlib1g-dev
+          - libsasl2-dev
+          - libldap2-dev
+          - build-essential
+        state: present
+
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+        update_cache: yes
+
+    - name: Install Docker Compose
+      get_url:
+        url: "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-{{ ansible_system | lower }}-{{ ansible_architecture }}"
+        dest: "/usr/local/bin/docker-compose"
+        mode: 'u+x'
+
+    - name: Clone Sentry self-hosted repository
+      git:
+        repo: 'https://github.com/getsentry/self-hosted.git'
+        dest: /home/ubuntu/sentry
+        version: master
+
+    - name: Start Sentry using Docker Compose
+      ansible.builtin.shell:
+       cmd: "cd /home/ubuntu/sentry && docker-compose up -d"
+      become: yes
+
+
